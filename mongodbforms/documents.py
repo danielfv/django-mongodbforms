@@ -85,7 +85,7 @@ def construct_instance(form, instance, fields=None, exclude=None):
         instance = instance()
         
     for f in instance._fields.values():
-        if isinstance(f, ObjectIdField):
+        if isinstance(f, ObjectIdField) and (not hasattr(form.Meta, "fields") or "id" not in form.Meta.fields):
             continue
         if not f.name in cleaned_data:
             continue
@@ -232,7 +232,7 @@ def fields_for_document(document, fields=None, exclude=None, widgets=None,
     
     for name in document._fields_ordered:
         f = document._fields.get(name)
-        if isinstance(f, ObjectIdField):
+        if isinstance(f, ObjectIdField) and (not fields or "id" not in fields):
             continue
         if fields and not f.name in fields:
             continue
@@ -707,12 +707,14 @@ class BaseDocumentFormSet(BaseFormSet):
             if form.cleaned_data.get("DELETE", False):
                 try:
                     obj.delete()
+                    continue
                 except AttributeError:
                     # if it has no delete method it is an embedded object. We
                     # just don't add to the list and it's gone. Cool huh?
                     continue
             if commit:
                 obj.save()
+
             saved.append(obj)
         return saved
 

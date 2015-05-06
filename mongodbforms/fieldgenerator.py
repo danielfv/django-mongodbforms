@@ -62,6 +62,7 @@ class MongoFormFieldGenerator(object):
         'mapfield': MapField,
         'filefield': forms.FileField,
         'imagefield': forms.ImageField,
+        'objectidfield': forms.CharField,
     }
     
     # uses the same keys as form_field_map
@@ -196,6 +197,17 @@ class MongoFormFieldGenerator(object):
             'initial': self.get_field_default(field),
             'label': self.get_field_label(field),
             'help_text': self.get_field_help_text(field)
+        }
+        defaults.update(self.check_widget(map_key))
+        form_class = self.form_field_map.get(map_key)
+        defaults.update(kwargs)
+        return form_class(**defaults)
+
+    def generate_objectidfield(self, field, **kwargs):
+        map_key = 'objectidfield'
+        defaults = {
+            "widget":forms.HiddenInput(), 
+            "required":True,
         }
         defaults.update(self.check_widget(map_key))
         form_class = self.form_field_map.get(map_key)
